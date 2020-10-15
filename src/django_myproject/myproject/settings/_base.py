@@ -164,3 +164,12 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'static'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# External apps
+import sys
+
+EXTERNAL_BASE = BASE_DIR / 'externals'
+EXTERNAL_LIBS_PATH = EXTERNAL_BASE / 'libs'
+EXTERNAL_APPS_PATH = EXTERNAL_BASE / 'apps'
+
+sys.path = ["", EXTERNAL_LIBS_PATH, EXTERNAL_APPS_PATH] + sys.path
