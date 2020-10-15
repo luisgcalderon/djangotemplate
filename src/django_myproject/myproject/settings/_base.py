@@ -9,12 +9,6 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-import os
-from django.core.exceptions import ImproperlyConfigured
-
-def get_secre(setting):
-    """Get the scret variable or return explicit exception."""
-
 
 from pathlib import Path
 
@@ -22,11 +16,37 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
+## Getting Secrets
+from django.core.exceptions import ImproperlyConfigured
+# import os
+
+# def get_secret(setting):
+#     """Get the scret variable or return explicit exception."""
+#     try:
+#         return os.environ[setting]
+#     except KeyError:
+#         error_msg = f'Set the {setting} environment variable'
+#         raise ImproperlyConfigured(error_msg)
+import os
+import json
+
+with open(Path(__file__).resolve().parent / 'secrets.json', 'r') as f:
+    secrets = json.loads(f.read())
+
+def get_secret(setting):
+    """Get the secret variable or return explicit exception."""
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = f'Set the {setting} secret variable'
+        raise ImproperlyConfigured(error_msg)
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'gml8=)s^2_-^qux3myq$(kju824ckx#m#)7gtn_f_kt_*o*nv='
+SECRET_KEY = get_secret('DJANGO_SECRET_KEY') # 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -83,9 +103,17 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': get_secret('DATABASE_NAME'),
+        'USER': get_secret('DATABASE_USER'),
+        'PASSWORD': get_secret('DATABASE_PASSWORD'),
+        'HOST': 'db',
+        'PORT': '5432',
+#     }
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+     }
 }
 
 
