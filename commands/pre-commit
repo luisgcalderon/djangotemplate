@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+from subprocess import check_output, CalledProcessError
+import os
+from datetime import datetime
+
+def root():
+    ''' return the absolute path of the repository root '''
+    try:
+        base = check_output(['git', 'rev-parse', '--show-toplevel'])
+    except CalledProcessError:
+        raise IOError('Current working directory is not a git repository')
+    return base.decode('utf-8').strip()
+
+    # Mover a .git/hooks/
