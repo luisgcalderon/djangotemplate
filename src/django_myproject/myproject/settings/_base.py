@@ -153,7 +153,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+from myproject.apps.core.versioning import get_git_changeset_timestamp
+
+timestamp = get_git_changeset_timestamp(BASE_DIR.parent.parent)
+STATIC_URL = f'/static/{timestamp}'
 ## Add for template structure
 LOCALE_PATHS = [
     BASE_DIR / 'locale',
