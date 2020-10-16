@@ -153,11 +153,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-from myproject.apps.core.versioning import get_git_changeset_timestamp
 
-timestamp = get_git_changeset_timestamp(BASE_DIR.parent.parent)
-STATIC_URL = f'/static/{timestamp}'
+
 ## Add for template structure
+if os.environ['PROJECT_ENV'] in ['PRODUCTION','STAGE']:
+    with open(BASE_DIR / 'myproject' / 'settings' / 'last-update.txt', 'r') as f:
+        timestamp = f.readline().strip()
+else:
+    from myproject.apps.core.versioning import get_git_changeset_timestamp
+    timestamp = get_git_changeset_timestamp(BASE_DIR.parent.parent)
+
+
+STATIC_URL = f'/static/{timestamp}'
 LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
@@ -175,4 +182,4 @@ EXTERNAL_BASE = BASE_DIR / 'externals'
 EXTERNAL_LIBS_PATH = EXTERNAL_BASE / 'libs'
 EXTERNAL_APPS_PATH = EXTERNAL_BASE / 'apps'
 
-sys.path = ["", EXTERNAL_LIBS_PATH, EXTERNAL_APPS_PATH] + sys.path
+sys.path = ["", str(EXTERNAL_LIBS_PATH), str(EXTERNAL_APPS_PATH)] + sys.path
