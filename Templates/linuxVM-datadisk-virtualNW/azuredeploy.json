@@ -17,23 +17,27 @@
     "functions": [],
     "variables": {
         "virtualNetworkSettings": {
-                "name": "[concat(parameters('project'),'-VN')]",
-                "addressPrefixes": "10.0.0.0/16",
-                "subnets":{
-                    "vms":{
-                        "name": "VirtualMachines",
-                        "addressPrefix": "10.0.0.0/24"
-                    },
-                    "database":{
-                        "name": "DataBases",
-                        "addressPrefix": "10.0.1.0/24"
-                    },
-                    "gateway":{
-                        "name": "GatewaySubnet",
-                        "addressPrefix": "10.0.255.0/27"
-                    }
+            "name": "[concat(parameters('project'),'-VN')]",
+            "addressPrefixes": "10.0.0.0/16",
+            "subnets": {
+                "vms": {
+                    "name": "VirtualMachines",
+                    "addressPrefix": "10.0.0.0/24"
+                },
+                "database": {
+                    "name": "DataBases",
+                    "addressPrefix": "10.0.1.0/24"
+                },
+                "gateway": {
+                    "name": "GatewaySubnet",
+                    "addressPrefix": "10.0.255.0/27"
                 }
+            }
 
+        },
+        "publicIPAddress":{
+            "name": "[concat(parameters('project'),'-ip')]",
+            "dnsName": "[concat(toLower(parameters('project')),'-dcalcon')]"
         }
     },
     "resources": [
@@ -43,7 +47,7 @@
             "apiVersion": "2019-11-01",
             "location": "[parameters('location')]",
             "tags": {
-                "displayName": "[variables('virtualNetworkSettings').name]" 
+                "displayName": "[variables('virtualNetworkSettings').name]"
             },
             "properties": {
                 "addressSpace": {
@@ -71,6 +75,54 @@
                         }
                     }
                 ]
+            }
+        },
+        {
+            "name": "[variables('publicIPAddress').name]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-11-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[variables('publicIPAddress').name]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('publicIPAddress').dnsName]"
+                }
+            }
+        },
+        {
+            "name": "[variables('virtualNetworkSettings').subnets.gateway.name]",
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "apiVersion": "2019-11-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddress').name)]",
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkSettings').name)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "vnetGatewayConfig",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkSettings').name, variables('virtualNetworkSettings').subnets.gateway.name)]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddress').name)]"
+                            }
+                        }
+                    }
+                ],
+                "sku": {
+                    "name": "Basic",
+                    "tier": "Basic"
+                },
+                "gatewayType": "Vpn",
+                "vpnType": "PolicyBased",
+                "enableBgp": true
             }
         }
     ],
