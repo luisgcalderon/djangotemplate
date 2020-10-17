@@ -125,7 +125,7 @@
                     "tier": "VpnGw1"
                 },
                 "gatewayType": "Vpn",
-                "vpnType": "PolicyBased",
+                "vpnType": "RouteBased",
                 "enableBgp": true,
                 "vpnClientConfiguration": {
                     "vpnClientAddressPool": {
