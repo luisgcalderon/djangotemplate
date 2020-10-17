@@ -1,0 +1,78 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "project": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the project"
+            },
+            "defaultValue": "ReservationSystem"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        }
+    },
+    "functions": [],
+    "variables": {
+        "virtualNetworkSettings": {
+                "name": "[concat(parameters('project'),'-VN')]",
+                "addressPrefixes": "10.0.0.0/16",
+                "subnets":{
+                    "vms":{
+                        "name": "VirtualMachines",
+                        "addressPrefix": "10.0.0.0/24"
+                    },
+                    "database":{
+                        "name": "DataBases",
+                        "addressPrefix": "10.0.1.0/24"
+                    },
+                    "gateway":{
+                        "name": "GatewaySubnet",
+                        "addressPrefix": "10.0.255.0/27"
+                    }
+                }
+
+        }
+    },
+    "resources": [
+        {
+            "name": "[variables('virtualNetworkSettings').name]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-11-01",
+            "location": "[parameters('location')]",
+            "tags": {
+                "displayName": "[variables('virtualNetworkSettings').name]" 
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('virtualNetworkSettings').addressPrefixes]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('virtualNetworkSettings').subnets.vms.name]",
+                        "properties": {
+                            "addressPrefix": "[variables('virtualNetworkSettings').subnets.vms.addressPrefix]"
+                        }
+                    },
+                    {
+                        "name": "[variables('virtualNetworkSettings').subnets.database.name]",
+                        "properties": {
+                            "addressPrefix": "[variables('virtualNetworkSettings').subnets.database.addressPrefix]"
+                        }
+                    },
+                    {
+                        "name": "[variables('virtualNetworkSettings').subnets.gateway.name]",
+                        "properties": {
+                            "addressPrefix": "[variables('virtualNetworkSettings').subnets.gateway.addressPrefix]"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {}
+}
