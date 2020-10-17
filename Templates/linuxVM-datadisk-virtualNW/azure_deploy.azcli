@@ -1,0 +1,6 @@
+az group create --name test --location southcentralus
+az deployment group validate --name testazuredeploy2 -g test --template-file Templates\linuxVM-datadisk-virtualNW\azuredeploy.json
+az deployment group create --name testazuredeploy -g test --template-file Templates\linuxVM-datadisk-virtualNW\azuredeploy.json
+
+az group delete -n test --yes --no-wait
+az group show -n test

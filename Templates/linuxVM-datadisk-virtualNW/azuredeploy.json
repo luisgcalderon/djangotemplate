@@ -1,0 +1,147 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "project": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the project"
+            },
+            "defaultValue": "ReservationSystem"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "publicCertData": {
+            "type": "securestring",
+            "defaultValue": "MIIC5zCCAc+gAwIBAgIQORhPW6Lr1rVMLUF1TS8oIDANBgkqhkiG9w0BAQsFADAWMRQwEgYDVQQDDAtQMlNSb290Q2VydDAeFw0yMDA5MTYwMzEyMDVaFw0yMTA5MTYwMzMyMDVaMBYxFDASBgNVBAMMC1AyU1Jvb3RDZXJ0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4/ySQU9N7J1WR7m6nADQ5sLbYs7RJD3ugq26qQEo1zQNyX7I7N8zfuJrWzDJadnUR7/j0wc4yylzPuwwpYfcwJfVlypmgLGsupnCA/uFeqIuD/ur5UiwmxkrpCiO3A0xjdUj8C9vg9JyUs3JpNr7xV+i9NcQ4zxDJHdjoPzO56o4irxoClb+0lsmft+RkfVWo77U+PGq8LaJkNCwz796h1fMVEtyyXh724zNG4+CpxnYAfJrQde4G0mMcFYXhHKiwgAX0l0S6dLEG4RG2//AsuvJISJawKiFP/3JvVRqoW2XywAILS9X8mYWI/nohkPibwX4sLQGlmXe3/5hZaEvaQIDAQABozEwLzAOBgNVHQ8BAf8EBAMCAgQwHQYDVR0OBBYEFBPrbstMNw4M0NA3UJJjaCskqCuNMA0GCSqGSIb3DQEBCwUAA4IBAQCatdgr1OEI9ogIwFGqE8yClERnbhJxF0v0SxsjU68ll1V//kzYaKiCSGfnxnngoI/CkwLPHJuHhWWHqdrFQcLGnAflGp/RIWT1H0jOjdSn3tYJxBOM35hjrJWcnKYuoU5X6eLpVwkryLaWatT+Fdz1MMeG/QMqvD8vzHW/06bBRnbrLhgDPmn2Vhth1ZcY4p7qPa5tnv/57iZrxEdwcZ0e+1sMBDEBITi7Bamfrff1S/Pr+AspvKUtBuG11p1TN6rfPumVIPa63QA0I8d+uu7XjFAxZQgybcwubr1NtfDuXGQn6A6v3ToG9CeicBadkpRarljlyUYp6oIbFQ9OmT6q"
+        }
+    },
+    "functions": [],
+    "variables": {
+        "virtualNetworkSettings": {
+            "name": "[concat(parameters('project'),'-VN')]",
+            "addressPrefixes": "10.0.0.0/16",
+            "subnets": {
+                "vms": {
+                    "name": "VirtualMachines",
+                    "addressPrefix": "10.0.0.0/24"
+                },
+                "database": {
+                    "name": "DataBases",
+                    "addressPrefix": "10.0.1.0/24"
+                },
+                "gateway": {
+                    "name": "GatewaySubnet",
+                    "addressPrefix": "10.0.255.0/27"
+                }
+            }
+
+        },
+        "publicIPAddress": {
+            "name": "[concat(parameters('project'),'-ip')]",
+            "dnsName": "[concat(toLower(parameters('project')),'-dcalcon')]"
+        }
+    },
+    "resources": [
+        {
+            "name": "[variables('virtualNetworkSettings').name]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2019-11-01",
+            "location": "[parameters('location')]",
+            "tags": {
+                "displayName": "[variables('virtualNetworkSettings').name]"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('virtualNetworkSettings').addressPrefixes]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('virtualNetworkSettings').subnets.vms.name]",
+                        "properties": {
+                            "addressPrefix": "[variables('virtualNetworkSettings').subnets.vms.addressPrefix]"
+                        }
+                    },
+                    {
+                        "name": "[variables('virtualNetworkSettings').subnets.database.name]",
+                        "properties": {
+                            "addressPrefix": "[variables('virtualNetworkSettings').subnets.database.addressPrefix]"
+                        }
+                    },
+                    {
+                        "name": "[variables('virtualNetworkSettings').subnets.gateway.name]",
+                        "properties": {
+                            "addressPrefix": "[variables('virtualNetworkSettings').subnets.gateway.addressPrefix]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('publicIPAddress').name]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2019-11-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[variables('publicIPAddress').name]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('publicIPAddress').dnsName]"
+                }
+            }
+        },
+        {
+            "name": "[variables('virtualNetworkSettings').subnets.gateway.name]",
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "apiVersion": "2019-11-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddress').name)]",
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkSettings').name)]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "vnetGatewayConfig",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkSettings').name, variables('virtualNetworkSettings').subnets.gateway.name)]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddress').name)]"
+                            }
+                        }
+                    }
+                ],
+                "sku": {
+                    "name": "VpnGw1",
+                    "tier": "VpnGw1"
+                },
+                "gatewayType": "Vpn",
+                "vpnType": "RouteBased",
+                "enableBgp": true,
+                "vpnClientConfiguration": {
+                    "vpnClientAddressPool": {
+                        "addressPrefixes": ["172.16.201.0/24"]
+                    },
+                    "vpnClientRootCertificates": [
+                        {
+                            "name": "P2SRootCert",
+                            "properties": {
+                                "publicCertData": "[parameters('publicCertData')]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
