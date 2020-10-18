@@ -21,4 +21,4 @@ def get_git_changeset_timestamp(absolute_path):
     changeset_timestamp = timestamp.strftime('%Y%m%d%H%M%S')
     return changeset_timestamp
 
-print(get_git_changeset_timestamp('/home/luisgcalderon/devcalcon/source/repos/django_fs'))
+# print(get_git_changeset_timestamp('/home/luisgcalderon/devcalcon/source/repos/django_fs'))
