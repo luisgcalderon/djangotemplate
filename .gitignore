@@ -131,3 +131,4 @@ dmypy.json
 #Added
 *env_variables.sh
 *secrets.json
+*.vscode
