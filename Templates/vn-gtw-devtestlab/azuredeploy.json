@@ -39,6 +39,17 @@
             }
 
         },
+        "devtestlab": {
+            "name": "[concat(parameters('project'),'-devtestlb')]",
+            "properties": {
+                "labStorageType": "Standard"
+            },
+            "tags": {
+                "project": "[parameters('project')]",
+                "environment": "development",
+                "cost": "devcalcon"
+            }
+        },
         "publicIPAddress": {
             "name": "[concat(parameters('project'),'-ip')]",
             "dnsName": "[concat(toLower(parameters('project')),'-dcalcon')]"
@@ -141,6 +152,49 @@
                     ]
                 }
             }
+        },
+        {
+            "type": "Microsoft.DevTestLab/labs",
+            "apiVersion": "2018-09-15",
+            "name": "[variables('devtestlab').name]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkSettings').name)]"
+            ],
+            "tags": "[variables('devtestlab').tags]",
+            "properties": {
+                "labStorageType": "[variables('devtestlab').properties.labStorageType]",
+                "premiumDataDisks": "Disabled"
+            },
+            "resources": [
+                {
+                    "type": "virtualnetworks",
+                    "name": "[variables('virtualNetworkSettings').name]",
+                    "apiVersion": "2018-09-15",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkSettings').name)]",
+                        "[resourceId('Microsoft.DevTestLab/labs', variables('devtestlab').name)]"
+                    ],
+                    "location": "[parameters('location')]",
+                    "properties": {
+                        "externalProviderResouceId": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkSettings').name)]",
+                        "subnetOverrides": [
+                            {
+                                "labSubnetName": "[variables('virtualNetworkSettings').subnets.vms.name]",
+                                "resourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('virtualNetworkSettings').name,variables('virtualNetworkSettings').subnets.vms.name)]",
+                                "useInVmCreationPermission": "Allow",
+                                "usePublicIpAddressPermission": "Deny"
+                            },
+                            {
+                                "labSubnetName": "[variables('virtualNetworkSettings').subnets.database.name]",
+                                "resourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('virtualNetworkSettings').name,variables('virtualNetworkSettings').subnets.database.name)]",
+                                "useInVmCreationPermission": "Allow",
+                                "usePublicIpAddressPermission": "Deny"
+                            }
+                        ]
+                    }
+                }
+            ]
         }
     ],
     "outputs": {}
