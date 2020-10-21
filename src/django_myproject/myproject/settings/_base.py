@@ -27,7 +27,6 @@ from django.core.exceptions import ImproperlyConfigured
 #     except KeyError:
 #         error_msg = f'Set the {setting} environment variable'
 #         raise ImproperlyConfigured(error_msg)
-import os
 import json
 
 with open(Path(__file__).resolve().parent / 'secrets.json', 'r') as f:
@@ -107,7 +106,7 @@ DATABASES = {
         'NAME': get_secret('DATABASE_NAME'),
         'USER': get_secret('DATABASE_USER'),
         'PASSWORD': get_secret('DATABASE_PASSWORD'),
-        'HOST': 'db',
+        'HOST': get_secret('DATABASE_HOST'),
         'PORT': '5432',
 #     }
 #     'default': {
@@ -156,6 +155,7 @@ USE_TZ = True
 
 
 ## Add for template structure
+import os
 if os.environ['PROJECT_ENV'] in ['PRODUCTION','STAGE']:
     with open(BASE_DIR / 'myproject' / 'settings' / 'last-update.txt', 'r') as f:
         timestamp = f.readline().strip()
@@ -164,7 +164,7 @@ else:
     timestamp = get_git_changeset_timestamp(BASE_DIR.parent.parent)
 
 
-STATIC_URL = f'/static/{timestamp}'
+STATIC_URL = f'/static/{timestamp}/'
 LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]

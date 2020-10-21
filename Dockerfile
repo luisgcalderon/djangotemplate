@@ -1,2 +1,2 @@
 FROM centos:latest
-CMD /bin/bash
+RUN yum -y update & yum clean all
