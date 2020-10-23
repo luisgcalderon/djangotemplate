@@ -1,5 +1,5 @@
 import os
-os.environ.setdefault('PROJECT_ENV', 'DEVELOPMENT')
+os.environ.setdefault('PROJECT_ENV', 'TEST')
 
 from ._base import *
 
