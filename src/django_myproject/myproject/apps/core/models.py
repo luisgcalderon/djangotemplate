@@ -202,4 +202,13 @@ def object_relation_base_factory(
         help_text=_("Please enter de ID of the related object"),
         max_length=255,
         default="") # for migrations
+    
+    content_object = GenericForeignKey(
+        ct_field=content_type_field,
+        fk_field=content_id_field)
+    
+    TheClass.add_to_class(content_type_field, content_type)
+    TheClass.add_to_class(object_id_field, object_id)
+    TheClass.add_to_class(content_object_field, content_object)
 
+    return TheClass
