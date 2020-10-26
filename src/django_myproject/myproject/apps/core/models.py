@@ -4,8 +4,13 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
+from django.contrib.contenttypes.models import ContentTypes
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.core.exceptions import FieldError
 
 # Create your models here.
+
+
 class UrlBase(models.Model):
     """
     A replacement for get_absolute_url()
@@ -33,11 +38,12 @@ class UrlBase(models.Model):
         except NotImplementedError:
             raise
         bits = urlparse(url)
-        return urlunparse(("","") + bits[2:])
+        return urlunparse(("", "") + bits[2:])
     get_url_path.dont_recurse = True
 
     def get_absolute_url(self):
         return self.get_url()
+
 
 class CreationModificationDateBase(models.Model):
     """
@@ -53,8 +59,10 @@ class CreationModificationDateBase(models.Model):
         _("Modification Date and Time"),
         auto_now=True,
     )
+
     class Meta:
         abstract = True
+
 
 class MetaTagsBase(models.Model):
     """
@@ -84,7 +92,7 @@ class MetaTagsBase(models.Model):
 
     class Meta:
         abstract = True
-    
+
     def get_meta_field(self, name, content):
         tag = ""
         if name and content:
@@ -94,18 +102,23 @@ class MetaTagsBase(models.Model):
                 "content": content,
             })
         return mark_safe(tag)
+
     def get_meta_keywords(self):
         return self.get_meta_field("keywords",
          self.meta_keywords)
+
     def get_meta_description(self):
         return self.get_meta_field("description",
          self.meta_description)
+
     def get_meta_author(self):
         return self.get_meta_field("author",
          self.meta_author)
+
     def get_meta_copyright(self):
         return self.get_meta_field("copyright",
          self.meta_copyright)
+
     def get_meta_tags(self):
         return mark_safe("\n".join((
             self.get_meta_keywords(),
@@ -113,3 +126,48 @@ class MetaTagsBase(models.Model):
             self.get_meta_author(),
             self.get_meta_copyright(),
         )))
+
+
+def object_relation_base_factory(
+    prefix=None,
+    prefix_verbose=None,
+    add_related_name=False,
+    limit_content_type_choices_to=None,
+    is_required=False):
+    """
+    Returns a mixin class for generic foreign keys using
+    "Content type - object ID" with dynamic field names.
+    This function is just a class generator.
+
+    Parameters:
+    prefix:           a prefux, which is added in front of
+                      the fields
+    prefix_verbose:   a verbose name of the prefix, used to
+                      generate a title for the field column
+                      of the content object in the Admin
+    add_related_name: a boolean value indicating, that a
+                      related name for the generated content
+                      type foreign key should be added. This
+                      value should be true, if you use more
+                      than on ObjectRelationBase in your
+                      model.
+    The model fields are created using this naming scheme:
+        <<prefix>>_content_type
+        <<prefix>>_content_id
+        <<prefix>>_content_object
+    """
+    p = ""
+    if prefix:
+        p = f"{prefix}_"
+
+    prefix_verbose = prefix_verbose or _("Related object")
+    limit_content_type_choices_to = limit_content_type_choices_to or {}
+
+    content_type_field = f"{p}content_type"
+    object_id_field = f"{p}object_id"
+    content_object_field = f"{p}content_object"
+
+    class TheClass(models.Model):
+        class Meta:
+            abstract = True
+    if 
