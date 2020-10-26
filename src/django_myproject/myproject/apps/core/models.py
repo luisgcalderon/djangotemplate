@@ -170,4 +170,36 @@ def object_relation_base_factory(
     class TheClass(models.Model):
         class Meta:
             abstract = True
-    if 
+    if add_related_name:
+        if not prefix:
+            raise FieldError("id add_related_name is set to "
+                             "True, a prefix must be given")
+        related_name = prefix
+    else:
+        related_name = None
+    
+    optional = not is_required
+
+    ct_verbose_name  = _(f"{prefix_verbose}'s type (model)'")
+
+    content_type = models.ForeignKey(
+        ContentType,
+        verbose_name=ct_verbose_name,
+        related_name=related_name,
+        blank=optional,
+        null=optional,
+        help_text=_("Please select the type (model) "
+                    "for the relation, you want to build."),
+        limit_choices_to=limit_content_type_choices_to,
+        on_delete=models.CASCADE)
+    
+    fk_verbose_name = prefix_verbose
+
+    object_id = models.CharField(
+        fk_verbose_name,
+        blank=optional,
+        null=False,
+        help_text=_("Please enter de ID of the related object"),
+        max_length=255,
+        default="") # for migrations
+
