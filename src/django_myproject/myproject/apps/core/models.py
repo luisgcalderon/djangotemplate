@@ -1,4 +1,5 @@
 from urllib.parse import urlparse, urlunparse
+from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.db import models
 
@@ -35,3 +36,20 @@ class UrlBase(models.Model):
 
     def get_absolute_url(self):
         return self.get_url()
+
+class CreationModificationDateBase(models.Model):
+    """
+    Abstract base class with creation and modification date and time
+    """
+
+    created = models.DateTimeField(
+        _("Creation Date and Time"),
+        auto_now_add=True,
+    )
+
+    modified = models.DateTimeField(
+        _("Modification Date and Time"),
+        auto_now=True,
+    )
+    class Meta:
+        abstract = True

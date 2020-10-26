@@ -3,9 +3,10 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
-from myproject.apps.core.models import UrlBase
 
-class Idea(UrlBase):
+from myproject.apps.core.models import UrlBase, CreationModificationDateBase
+
+class Idea(UrlBase, CreationModificationDateBase):
     title = models.CharField(
         _("Title"),
         max_length=200,
