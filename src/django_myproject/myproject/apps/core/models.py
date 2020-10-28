@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
-from django.contrib.contenttypes.models import ContentTypes
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.exceptions import FieldError
 
@@ -205,7 +205,7 @@ def object_relation_base_factory(
     
     content_object = GenericForeignKey(
         ct_field=content_type_field,
-        fk_field=content_id_field)
+        fk_field=object_id_field)
     
     TheClass.add_to_class(content_type_field, content_type)
     TheClass.add_to_class(object_id_field, object_id)
