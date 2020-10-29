@@ -59,7 +59,7 @@
         {
             "name": "[variables('virtualNetworkSettings').name]",
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2019-11-01",
+            "apiVersion": "2020-05-01",
             "location": "[parameters('location')]",
             "tags": {
                 "displayName": "[variables('virtualNetworkSettings').name]"
@@ -74,13 +74,17 @@
                     {
                         "name": "[variables('virtualNetworkSettings').subnets.vms.name]",
                         "properties": {
-                            "addressPrefix": "[variables('virtualNetworkSettings').subnets.vms.addressPrefix]"
+                            "addressPrefix": "[variables('virtualNetworkSettings').subnets.vms.addressPrefix]",
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
                         }
                     },
                     {
                         "name": "[variables('virtualNetworkSettings').subnets.database.name]",
                         "properties": {
-                            "addressPrefix": "[variables('virtualNetworkSettings').subnets.database.addressPrefix]"
+                            "addressPrefix": "[variables('virtualNetworkSettings').subnets.database.addressPrefix]",
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
                         }
                     },
                     {
@@ -89,7 +93,10 @@
                             "addressPrefix": "[variables('virtualNetworkSettings').subnets.gateway.addressPrefix]"
                         }
                     }
-                ]
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
             }
         },
         {
@@ -103,7 +110,8 @@
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
-                    "domainNameLabel": "[variables('publicIPAddress').dnsName]"
+                    "domainNameLabel": "[variables('publicIPAddress').dnsName]",
+                    "fqdn": "[concat(variables('publicIPAddress').dnsName,'.southcentralus.cloudapp.azure.com')]"
                 }
             }
         },
@@ -142,6 +150,10 @@
                     "vpnClientAddressPool": {
                         "addressPrefixes": ["172.16.201.0/24"]
                     },
+                    "vpnClientProtocols": [
+                        "IkeV2",
+                        "OpenVPN"
+                    ],
                     "vpnClientRootCertificates": [
                         {
                             "name": "P2SRootCert",
@@ -195,7 +207,39 @@
                     }
                 }
             ]
-        }
+        },
+        {
+            "type": "microsoft.devtestlab/labs/artifactsources",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(variables('devtestlab').name, '/public environment repo')]",
+            "dependsOn": [
+                "[resourceId('microsoft.devtestlab/labs', variables('devtestlab').name)]"
+            ],
+            "properties": {
+                "displayName": "Public Environment Repo",
+                "uri": "https://github.com/Azure/azure-devtestlab.git",
+                "sourceType": "GitHub",
+                "armTemplateFolderPath": "/Environments",
+                "branchRef": "master",
+                "status": "Disabled"
+            }
+        },
+        {
+            "type": "microsoft.devtestlab/labs/artifactsources",
+            "apiVersion": "2018-09-15",
+            "name": "[concat(variables('devtestlab').name, '/public repo')]",
+            "dependsOn": [
+                "[resourceId('microsoft.devtestlab/labs', variables('devtestlab').name)]"
+            ],
+            "properties": {
+                "displayName": "Public Artifact Repo",
+                "uri": "https://github.com/Azure/azure-devtestlab.git",
+                "sourceType": "GitHub",
+                "folderPath": "/Artifacts",
+                "branchRef": "master",
+                "status": "Enabled"
+            }
+        },
     ],
     "outputs": {}
 }
