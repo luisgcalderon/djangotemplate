@@ -3,7 +3,6 @@ from django.db import models
 from django.utils.translation import get_language
 from django.utils import translation
 
-
 class MultilingualField(models.Field):
     SUPPORTED_FIELD_TYPES = [models.CharField, models.TextField]
 
@@ -32,16 +31,17 @@ class MultilingualField(models.Field):
             max_length=self.max_length,
             unique=self.unique,
             blank=_blank,
-            null=False, #we ignore the null argument!
+            null=False, # we ignore the null argument!
             db_index=self.db_index,
             default=self.default or "",
             editable=self._editable,
-            serialize=self.choices,
+            serialize=self.serialize,
             choices=self.choices,
             help_text=self.help_text,
             db_column=None,
             db_tablespace=self.db_tablespace)
         return localized_field
+
     def contribute_to_class(self, cls, name,
                             private_only=False,
                             virtual_only=False):
@@ -49,22 +49,24 @@ class MultilingualField(models.Field):
             language = get_language()
             val = self.__dict__.get(
                 MultilingualField.localized_field_name(
-                    name, language))
+                        name, language))
             if not val:
                 val = self.__dict__.get(
                     MultilingualField.localized_field_name(
-                        name, settings.LANGUAGE_CODE))
+                            name, settings.LANGUAGE_CODE))
             return val
-        # generate language-specific fields dymanically
+
+        # generate language-specific fields dynamically
         if not cls._meta.abstract:
             if self.localized_field_model:
                 for lang_code, lang_name in settings.LANGUAGES:
-                    localized_field = self.get:localized_field(
+                    localized_field = self.get_localized_field(
                         lang_code, lang_name)
                     localized_field.contribute_to_class(
-                        cls,
-                        MultilingualField.localized_field_name(
-                            name, lang_code))
+                            cls,
+                            MultilingualField.localized_field_name(
+                                    name, lang_code))
+
                 setattr(cls, name, property(translated_value))
             else:
                 super().contribute_to_class(
