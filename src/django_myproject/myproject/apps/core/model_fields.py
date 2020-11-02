@@ -71,3 +71,8 @@ class MultilingualField(models.Field):
             else:
                 super().contribute_to_class(
                     cls, name, private_only, virtual_only)
+class MultilingualCharField(models.CharField, MultilingualField):
+    pass
+
+class MultingualTextField(models.TextField, MultilingualField):
+    pass
