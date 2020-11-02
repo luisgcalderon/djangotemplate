@@ -180,7 +180,7 @@ def object_relation_base_factory(
     
     optional = not is_required
 
-    ct_verbose_name  = _(f"{prefix_verbose}'s type (model)'")
+    ct_verbose_name  = _(f"{prefix_verbose}'s type (model)")
 
     content_type = models.ForeignKey(
         ContentType,
