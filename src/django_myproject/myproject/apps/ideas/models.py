@@ -4,10 +4,14 @@ from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 
+from myproject.apps.core.model_fields import (
+    MultilingualCharField,
+    MultingualTextField,
+)
 from myproject.apps.core.models import (
     UrlBase, 
     CreationModificationDateBase,
-    object_relation_base_factory as generic_relation
+    object_relation_base_factory as generic_relation,
 )
 
 FavoriteObjectBase = generic_relation(
@@ -38,18 +42,18 @@ class Like(FavoriteObjectBase, OwnerBase):
         ))
 
 class Idea(UrlBase, CreationModificationDateBase):
-    title = models.CharField(
+    title = MultilingualCharField(
         _("Title"),
         max_length=200,
     )
-    content = models.TextField(
+    content = MultingualTextField(
         _("Content"),
     )
     slug = models.SlugField(_("Slug for the urls"), max_length=50)
 
-    # class Meta:
-    #     verbose_name = _("Idea")
-    #     verbose_name_plural = _("Ideas")
+    class Meta:
+        verbose_name = _("Idea")
+        verbose_name_plural = _("Ideas")
 
     def __str__(self):
         return self.title

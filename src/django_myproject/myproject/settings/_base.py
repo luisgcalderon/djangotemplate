@@ -150,6 +150,24 @@ USE_L10N = True
 
 USE_TZ = True
 
+# LANGUAGE_CODE = "en"
+
+# All official languages of European Union
+LANGUAGES = [
+    ("bg", "Bulgarian"),    ("hr", "Croatian"),
+    ("cs", "Czech"),        ("da", "Danish"),
+    ("nl", "Dutch"),        ("en", "English"),
+    ("et", "Estonian"),     ("fi", "Finnish"),
+    ("fr", "French"),       ("de", "German"),
+    ("el", "Greek"),        ("hu", "Hungarian"),
+    ("ga", "Irish"),        ("it", "Italian"),
+    ("lv", "Latvian"),      ("lt", "Lithuanian"),
+    ("mt", "Maltese"),      ("pl", "Polish"),
+    ("pt", "Portuguese"),   ("ro", "Romanian"),
+    ("sk", "Slovak"),       ("sl", "Slovene"),
+    ("es", "Spanish"),      ("sv", "Swedish"),
+]
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
